@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { Map, marker, tileLayer } from 'leaflet';
+import { Component, ElementRef } from '@angular/core';
+import * as L from 'leaflet';
 import { Subject, takeUntil } from 'rxjs';
 import { ParkingService } from 'src/app/core/services/parking.service';
 import { MessageService } from 'primeng/api';
@@ -17,7 +17,8 @@ export class SearchPlacesComponent {
 
   constructor(
     private parkingService: ParkingService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private elementRef: ElementRef
   ) {}
 
   ngOnInit(): void {
@@ -30,13 +31,11 @@ export class SearchPlacesComponent {
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (resp: ParkingLot) => {
-          console.log('consumiendo vixxxio', resp);
           if (!resp) {
             this.show('error', 'Error', 'No se encontrarons parqueaderos');
           }
-          this.parqueaderos = resp;          
-            this.showCityMap(this.mapCity);
-         
+          this.parqueaderos = resp;
+          this.showCityMap();
         },
         (err) => {
           this.show('error', 'Error', err.message);
@@ -59,29 +58,45 @@ export class SearchPlacesComponent {
   }
 
   ngAfterViewInit(): void {
-    this.mapCity = new Map('map').setView([3.44898, -76.52781], 13);
-    tileLayer(
+    this.mapCity = new L.Map('map').setView([3.44898, -76.52781], 13);
+    L.tileLayer(
       'https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
       {
         maxZoom: 20,
         attribution:
           '<a href="https://github.com/cyclosm/cyclosm-cartocss-style/releases" title="CyclOSM - Open Bicycle render">CyclOSM</a> | Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }
-    ).addTo(this.mapCity );
+    ).addTo(this.mapCity);
 
     //this.showCityMap(this.mapCity );
   }
 
-  showCityMap(map: any) {  
-    console.log('parkes', this.parqueaderos);
-    
+  showCityMap() {    
     this.parqueaderos.forEach((item: any) => {
-      marker([item.latitude, item.longitude]).addTo(map).bindTooltip(item.name);
+      const popupOptions = {
+        className: "customPopup test2"
+      };
+      const popupInfo = `
+      <p class="popup__header"> <strong> ${item.name} </strong> <br> 
+      <div class="separator-1">Dirección: ${item.address}</div>
+      <div class="separator-1">Horario de atención: ${item.start_date} - ${item.end_date}</div>
+      <button type="button" id="sendData" class="edit btn btn-warning btn-sm btn-block dataModal sendData" data-toggle="modal" data-target="#dataModal">Reservar</button> </p>`;
+      const marker: L.Marker = L.marker([item.latitude, item.longitude])
+        .addTo(this.mapCity)
+        .bindTooltip(item.name)
+        .bindPopup(popupInfo, popupOptions)
+        .on("popupopen", () => {
+          this.elementRef.nativeElement
+            .querySelector(".edit")
+            .addEventListener("click", (e: any) => {
+              this.reservar();
+            });
+        })      
     });
-      
-    
-    //const markerItem = marker([lat, lng]).addTo(map).bindTooltip('a ver');
-    // map.fitBounds([[markerItem.getLatLng().lat, markerItem.getLatLng().lng]]);
   }
-  
+
+  reservar() {
+    // Aquí puedes incluir el código que realiza la reserva
+    alert('Reserva realizada con éxito!');
+  }
 }

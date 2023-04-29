@@ -13,7 +13,7 @@ export class ParkingService {
   obtenerLoterias(): Observable<ParkingLot> {
     return this.http
       .get<ParkingLot>(
-        `${environment.apiParkingLot}parking-lot/getAllParkingLot`
+        `${environment.apiParkingLot}parking-lot/getAllParkingLots`
       )
       .pipe(
         map(
