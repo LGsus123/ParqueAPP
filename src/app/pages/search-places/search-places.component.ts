@@ -2,7 +2,7 @@ import { Component, ElementRef } from '@angular/core';
 import * as L from 'leaflet';
 import { Subject, takeUntil } from 'rxjs';
 import { ParkingService } from 'src/app/core/services/parking.service';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { ParkingLot, ParkingSpace } from 'src/app/core/models/parqueapp';
 
 @Component({
@@ -16,15 +16,19 @@ export class SearchPlacesComponent {
   public listaPlazas: any;
   public mapCity: any;
 
+  displayModal = false;
+
   constructor(
     private parkingService: ParkingService,
     private messageService: MessageService,
-    private elementRef: ElementRef
+    private elementRef: ElementRef,
+    private confirmationService: ConfirmationService
   ) {}
 
   ngOnInit(): void {
     this.getParkingLots();
   }
+  
 
   getParkingLots() {
     this.parkingService
@@ -106,7 +110,7 @@ export class SearchPlacesComponent {
           this.show('error', 'Error', 'No se encontraron plazas disponibles');
         }
         this.listaPlazas = resp;
-        this.mostarPlazasDisponibles();
+        this.mostarPlazasDisponibles(id);
       },
       (err) => {
         this.show('error', 'Error', err.message);
@@ -114,9 +118,17 @@ export class SearchPlacesComponent {
     );
   }
 
-  mostarPlazasDisponibles(){
-    let plazas = this.listaPlazas.length;
-    alert('Contamos con ' + plazas + ' plazas disponibles.');
-    plazas=0;
+  mostarPlazasDisponibles(id: number){
+    let parkingSelect = this.parqueaderos.find((x: any) => x.id === id);
+    let placesAvailable =  this.listaPlazas.length;
+    this.confirmationService.confirm({
+      message: `El parqueadero <b>${parkingSelect.name}</b> tiene ${placesAvailable} plazas disponibles, desea reservar?`,
+      accept: () => {
+        // Lógica si se presiona aceptar
+      },
+      reject: () => {
+        // Lógica si se presiona cancelar
+      }
+    });
   }
 }

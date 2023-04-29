@@ -30,6 +30,7 @@ import { ReservationComponent } from './pages/reservation/reservation.component'
 import { ManagementReservationComponent } from './pages/management-reservation/management-reservation.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ConfirmationService } from 'primeng/api';
 
 
 export function HttpLoaderFactory(http: HttpClient) {
@@ -76,6 +77,7 @@ export function HttpLoaderFactory(http: HttpClient) {
   ],
   providers: [
     MessageService,
+    ConfirmationService
 
   ],
   bootstrap: [AppComponent]
