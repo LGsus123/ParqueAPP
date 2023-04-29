@@ -5,7 +5,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MenuModule } from 'primeng/menu';
 import { ToastModule } from 'primeng/toast';
 import { MegaMenuModule } from 'primeng/megamenu';
@@ -31,6 +31,8 @@ import { ManagementReservationComponent } from './pages/management-reservation/m
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService } from 'primeng/api';
+import { DropdownModule } from 'primeng/dropdown';
+import { CalendarModule } from 'primeng/calendar';
 
 
 export function HttpLoaderFactory(http: HttpClient) {
@@ -67,6 +69,9 @@ export function HttpLoaderFactory(http: HttpClient) {
     ProgressSpinnerModule,
     HttpClientModule,
     ConfirmDialogModule,
+    ReactiveFormsModule,
+    DropdownModule,
+    CalendarModule,
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,

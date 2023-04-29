@@ -4,6 +4,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { ParkingService } from 'src/app/core/services/parking.service';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ParkingLot, ParkingSpace } from 'src/app/core/models/parqueapp';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-search-places',
@@ -17,18 +18,45 @@ export class SearchPlacesComponent {
   public mapCity: any;
 
   displayModal = false;
+  reservaForm: any = FormGroup;
+
+  listaVehiculos: any[] = [];
 
   constructor(
     private parkingService: ParkingService,
     private messageService: MessageService,
     private elementRef: ElementRef,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private formBuilder: FormBuilder
   ) {}
 
   ngOnInit(): void {
     this.getParkingLots();
+    this.crearFormulario();
+    this.listaVehiculos = [
+      {
+        id: 1,
+        placa: 'ICQ40D',
+      },
+      {
+        id: 2,
+        placa: 'JBG23F',
+      },
+      {
+        id: 3,
+        placa: 'NPM16R',
+      },
+    ];
   }
-  
+
+  crearFormulario() {
+    this.reservaForm = this.formBuilder.group({
+      placa: ['', Validators.required],
+      fechaReserva: ['', Validators.required],
+      horaEntrada: ['', Validators.required],
+      horaSalida: ['', Validators.required],
+    });
+  }
 
   getParkingLots() {
     this.parkingService
@@ -76,10 +104,10 @@ export class SearchPlacesComponent {
     //this.showCityMap(this.mapCity );
   }
 
-  showCityMap() {    
+  showCityMap() {
     this.parqueaderos.forEach((item: any) => {
       const popupOptions = {
-        className: "customPopup test2"
+        className: 'customPopup test2',
       };
       const popupInfo = `
       <p class="popup__header"> <strong> ${item.name} </strong> <br> 
@@ -90,45 +118,59 @@ export class SearchPlacesComponent {
         .addTo(this.mapCity)
         .bindTooltip(item.name)
         .bindPopup(popupInfo, popupOptions)
-        .on("popupopen", () => {
+        .on('popupopen', () => {
           this.elementRef.nativeElement
-            .querySelector(".edit")
-            .addEventListener("click", (e: any) => {
+            .querySelector('.edit')
+            .addEventListener('click', (e: any) => {
               this.reservar(item.id);
             });
-        })      
+        });
     });
   }
 
-  reservar(id: number) {    
+  reservar(id: number) {
     this.parkingService
-    .getAllParkingSpaces(id)
-    .pipe(takeUntil(this.unsubscribe$))
-    .subscribe(
-      (resp: ParkingSpace) => {
-        if (!resp) {
-          this.show('error', 'Error', 'No se encontraron plazas disponibles');
+      .getAllParkingSpaces(id)
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (resp: ParkingSpace) => {
+          if (!resp) {
+            this.show('error', 'Error', 'No se encontraron plazas disponibles');
+          }
+          this.listaPlazas = resp;
+          this.mostarPlazasDisponibles(id);
+        },
+        (err) => {
+          this.show('error', 'Error', err.message);
         }
-        this.listaPlazas = resp;
-        this.mostarPlazasDisponibles(id);
-      },
-      (err) => {
-        this.show('error', 'Error', err.message);
-      }
-    );
+      );
   }
 
-  mostarPlazasDisponibles(id: number){
+  mostarPlazasDisponibles(id: number) {
     let parkingSelect = this.parqueaderos.find((x: any) => x.id === id);
-    let placesAvailable =  this.listaPlazas.length;
+    let placesAvailable = this.listaPlazas.length;
     this.confirmationService.confirm({
+      key: 'plazas-disponibles',
       message: `El parqueadero <b>${parkingSelect.name}</b> tiene ${placesAvailable} plazas disponibles, desea reservar?`,
       accept: () => {
-        // Lógica si se presiona aceptar
+        this.mostrarModalRegistro();
       },
       reject: () => {
         // Lógica si se presiona cancelar
-      }
+      },
     });
+  }
+
+  mostrarModalRegistro() {
+    this.displayModal = true;
+  }
+
+  realizarRegistro() {
+    // Lógica para guardar la reserva
+    this.displayModal = false; // Cerrar el diálogo
+  }
+
+  cancelarReserva() {
+    this.displayModal = false;
   }
 }
