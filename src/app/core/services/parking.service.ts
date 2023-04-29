@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ParkingLot } from '../models/parqueapp';
+import { ParkingLot, ParkingSpace } from '../models/parqueapp';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -10,10 +10,25 @@ import { environment } from 'src/environments/environment';
 export class ParkingService {
   constructor(private http: HttpClient) {}
 
-  obtenerLoterias(): Observable<ParkingLot> {
+  getAllParkingLots(): Observable<ParkingLot> {
     return this.http
       .get<ParkingLot>(
         `${environment.apiParkingLot}parking-lot/getAllParkingLots`
+      )
+      .pipe(
+        map(
+          (resp) => {
+            return resp;
+          },
+          (error: any) => error
+        )
+      );
+  }
+
+  getAllParkingSpaces(id: number): Observable<ParkingSpace> {
+    return this.http
+      .get<ParkingSpace>(
+        `${environment.apiParkingLot}parking-space/getAllParkingSpacesEnableByParkingLotId/${id}`
       )
       .pipe(
         map(

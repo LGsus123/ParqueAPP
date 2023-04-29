@@ -19,3 +19,10 @@ export interface Customer {
     phone: number,
     address: string,
 }
+
+export interface ParkingSpace {
+    id: number,
+    type: string,
+    state: number,
+    parking_lot: ParkingLot
+}

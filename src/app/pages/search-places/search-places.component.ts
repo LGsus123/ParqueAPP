@@ -3,7 +3,7 @@ import * as L from 'leaflet';
 import { Subject, takeUntil } from 'rxjs';
 import { ParkingService } from 'src/app/core/services/parking.service';
 import { MessageService } from 'primeng/api';
-import { ParkingLot } from 'src/app/core/models/parqueapp';
+import { ParkingLot, ParkingSpace } from 'src/app/core/models/parqueapp';
 
 @Component({
   selector: 'app-search-places',
@@ -13,6 +13,7 @@ import { ParkingLot } from 'src/app/core/models/parqueapp';
 export class SearchPlacesComponent {
   private unsubscribe$ = new Subject<void>();
   public parqueaderos: any;
+  public listaPlazas: any;
   public mapCity: any;
 
   constructor(
@@ -27,12 +28,12 @@ export class SearchPlacesComponent {
 
   getParkingLots() {
     this.parkingService
-      .obtenerLoterias()
+      .getAllParkingLots()
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (resp: ParkingLot) => {
           if (!resp) {
-            this.show('error', 'Error', 'No se encontrarons parqueaderos');
+            this.show('error', 'Error', 'No se encontraron parqueaderos');
           }
           this.parqueaderos = resp;
           this.showCityMap();
@@ -89,14 +90,33 @@ export class SearchPlacesComponent {
           this.elementRef.nativeElement
             .querySelector(".edit")
             .addEventListener("click", (e: any) => {
-              this.reservar();
+              this.reservar(item.id);
             });
         })      
     });
   }
 
-  reservar() {
-    // Aquí puedes incluir el código que realiza la reserva
-    alert('Reserva realizada con éxito!');
+  reservar(id: number) {    
+    this.parkingService
+    .getAllParkingSpaces(id)
+    .pipe(takeUntil(this.unsubscribe$))
+    .subscribe(
+      (resp: ParkingSpace) => {
+        if (!resp) {
+          this.show('error', 'Error', 'No se encontraron plazas disponibles');
+        }
+        this.listaPlazas = resp;
+        this.mostarPlazasDisponibles();
+      },
+      (err) => {
+        this.show('error', 'Error', err.message);
+      }
+    );
+  }
+
+  mostarPlazasDisponibles(){
+    let plazas = this.listaPlazas.length;
+    alert('Contamos con ' + plazas + ' plazas disponibles.');
+    plazas=0;
   }
 }
