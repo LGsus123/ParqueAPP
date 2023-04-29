@@ -29,6 +29,7 @@ import { DetailParkingComponent } from './pages/detail-parking/detail-parking.co
 import { ReservationComponent } from './pages/reservation/reservation.component';
 import { ManagementReservationComponent } from './pages/management-reservation/management-reservation.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
 
 export function HttpLoaderFactory(http: HttpClient) {
@@ -64,6 +65,7 @@ export function HttpLoaderFactory(http: HttpClient) {
     ChartModule,
     ProgressSpinnerModule,
     HttpClientModule,
+    ConfirmDialogModule,
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,

@@ -1,5 +1,7 @@
 export const environment = {
     production: false,
     apiUrl: 'your-api-url.com',
-    version: '1.0.0'
+    version: '1.0.0',
+
+    apiParkingLot: 'http://localhost:8080/'
   };
