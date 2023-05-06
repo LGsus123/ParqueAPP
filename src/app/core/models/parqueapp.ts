@@ -26,3 +26,9 @@ export interface ParkingSpace {
     state: number,
     parking_lot: ParkingLot
 }
+
+export interface Vehicle {
+    id: number,
+    plate: string;
+    type: string;
+}

@@ -1,27 +1,68 @@
 <div id="map"></div>
+
 <p-toast></p-toast>
 
-<p-confirmDialog header="Confirmar"
-  key="plazas-disponibles"
-  icon="pi pi-exclamation-triangle">
-</p-confirmDialog>
+<form [formGroup]="reservaForm" class="p-fluid">
+  <p-confirmDialog
+    header="Confirmar"
+    key="plazas-disponibles"
+    icon="pi pi-exclamation-triangle"
+  >
+  </p-confirmDialog>
 
-<p-dialog header="Reserva de parqueadero" [(visible)]="displayModal" [style]="{width: '20vw'}">
-  <form [formGroup]="reservaForm" class="p-fluid">
+  <p-dialog
+    header="Seleccione su vehiculo"
+    [(visible)]="displayModalPlazas"
+    [style]="{ width: '20vw' }"
+    [modal]="true"
+  >
+    <!--  <p>El parqueadero <b>{{plazaSeleccionada.name}}</b> tiene {{listaPlazas.length}} plazas disponibles, desea reservar?</p> -->
+    <div class="p-col-4 p-md-text-left p-sm-12 p-text-right">
+      <label for="Placa">Placa</label>
+      <div class="position-relative">
+        <p-dropdown
+          [options]="listaVehiculos"
+          formControlName="placa"
+          class=""
+          optionLabel="plate"
+          [filter]="true"
+          filterBy="plate"
+          [showClear]="true"
+          placeholder="Seleccion placa"
+          appendTo="body"
+          (onChange)="mostrarPlazasDisponiblesPlaca($event.value)"
+        >
+          <ng-template let-vehiculo pTemplate="item">
+            <div class="d-flex align-items-center gap-2">
+              <div>{{ vehiculo.plate }}</div>
+            </div>
+          </ng-template>
+        </p-dropdown>
+      </div>
+    </div>
+  </p-dialog>
+
+  <p-dialog
+    header="Reserva de parqueadero"
+    [(visible)]="displayModalRegistro"
+    [style]="{ width: '20vw' }"
+  >
     <div class="p-col-4 p-md-text-left p-sm-12 p-text-right">
       <label for="placa">Placa de vehículo:</label>
       <div class="position-relative">
-        <p-dropdown [options]="listaVehiculos"
-          class=""
-          optionLabel="name"
+        <p-dropdown
+          [options]="listaVehiculos"
+          formControlName="placa"
+          optionLabel="plate"
           [filter]="true"
-          filterBy="placa"
+          filterBy="plate"
           [showClear]="true"
           placeholder="Seleccion placa"
-          appendTo="body">
+          appendTo="body"
+        >
           <ng-template let-vehiculo pTemplate="item">
             <div class="d-flex align-items-center gap-2">
-              <div>{{ vehiculo.placa }}</div>
+              <div>{{ vehiculo.plate }}</div>
             </div>
           </ng-template>
         </p-dropdown>
@@ -31,29 +72,50 @@
     <div class="p-col-4 p-text-right">
       <label for="fechaReserva">Fecha reserva:</label>
       <div class="p-col-4 p-pt-2">
-        <p-calendar formControlName="fechaReserva" [showIcon]="false" label="Fecha reserva:" [required]="true"></p-calendar>
+        <p-calendar
+          formControlName="fechaReserva"
+          [showIcon]="false"
+          label="Fecha reserva:"
+          [required]="true"
+        ></p-calendar>
       </div>
     </div>
 
     <div class="p-col-4 p-text-right">
       <label for="horaEntrada">Hora de entrada:</label>
       <div class="p-col-4 p-pt-2">
-        <p-calendar [timeOnly]="true" formControlName="horaEntrada" [showIcon]="false" [required]="true"></p-calendar>
+        <p-calendar
+          [timeOnly]="true"
+          formControlName="horaEntrada"
+          [showIcon]="false"
+          [required]="true"
+        ></p-calendar>
       </div>
     </div>
 
     <div class="p-col-4 p-text-right">
       <label for="horaSalida">Hora de salida:</label>
       <div class="p-col-4 p-pt-2">
-        <p-calendar [timeOnly]="true" formControlName="horaSalida" [showIcon]="false" [required]="true"></p-calendar>
+        <p-calendar
+          [timeOnly]="true"
+          formControlName="horaSalida"
+          [showIcon]="false"
+          [required]="true"
+        ></p-calendar>
       </div>
-    </div>    
-    <hr class="separator">
-    <div class="card flex flex-wrap gap-3 justify-content-center">
-        <p-button label="Aceptar" styleClass="p-button-raised" (click)="realizarRegistro()"></p-button>   
-        <p-button label="Cancelar" styleClass="p-button-outlined p-button-secondary" (click)="cancelarReserva()"></p-button>     
     </div>
-  </form>
-</p-dialog>
-
-
+    <hr class="separator" />
+    <div class="card flex flex-wrap gap-3 justify-content-center">
+      <p-button
+        label="Aceptar"
+        styleClass="p-button-raised"
+        (click)="realizarRegistro()"
+      ></p-button>
+      <p-button
+        label="Cancelar"
+        styleClass="p-button-outlined p-button-secondary"
+        (click)="cancelarReserva()"
+      ></p-button>
+    </div>
+  </p-dialog>
+</form>

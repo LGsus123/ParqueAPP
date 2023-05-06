@@ -5,6 +5,8 @@ import { ParkingService } from 'src/app/core/services/parking.service';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ParkingLot, ParkingSpace } from 'src/app/core/models/parqueapp';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { DomHandler } from 'primeng/dom';
+import { Vehicle } from '../../core/models/parqueapp';
 
 @Component({
   selector: 'app-search-places',
@@ -14,13 +16,15 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 export class SearchPlacesComponent {
   private unsubscribe$ = new Subject<void>();
   public parqueaderos: any;
-  public listaPlazas: any;
+  public listaPlazas: any = [];
   public mapCity: any;
 
-  displayModal = false;
-  reservaForm: any = FormGroup;
-
-  listaVehiculos: any[] = [];
+  public displayModalRegistro = false;
+  public displayModalPlazas = false;
+  public reservaForm: any = FormGroup;
+  public plazaSeleccionada: any = {};
+  public listaVehiculos: any = [];
+  public selectedVehicleType: any;
 
   constructor(
     private parkingService: ParkingService,
@@ -31,22 +35,35 @@ export class SearchPlacesComponent {
   ) {}
 
   ngOnInit(): void {
-    this.getParkingLots();
+    //this.getParkingLots();
     this.crearFormulario();
     this.listaVehiculos = [
       {
         id: 1,
-        placa: 'ICQ40D',
+        plate: 'ICQ40D',
+        type: 'Moto',
       },
       {
         id: 2,
-        placa: 'JBG23F',
+        plate: 'JBG23F',
+        type: 'Carro',
       },
       {
         id: 3,
-        placa: 'NPM16R',
+        plate: 'NPM16R',
+        type: 'Carro',
       },
     ];
+
+    this.openPlatesModal();
+  }
+
+  openPlatesModal() {
+    this.displayModalPlazas = true;
+  }
+
+  closePlatesModal() {
+    this.displayModalPlazas = false;
   }
 
   crearFormulario() {
@@ -56,6 +73,37 @@ export class SearchPlacesComponent {
       horaEntrada: ['', Validators.required],
       horaSalida: ['', Validators.required],
     });
+  }
+
+  
+
+  /**
+   * Inicia las ventanas de confirmacion, tiene las siguientes modalidades
+   * success
+   * info
+   * warn
+   * error
+   */
+  show(severity: string, summary: string, detail: string) {
+    this.messageService.add({
+      severity: severity,
+      summary: summary,
+      detail: detail,
+    });
+  }
+
+  ngAfterViewInit(): void {
+    this.mapCity = new L.Map('map').setView([3.44898, -76.52781], 15);
+    L.tileLayer(
+      'https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
+      {
+        maxZoom: 20,
+        attribution:
+          '<a href="https://github.com/cyclosm/cyclosm-cartocss-style/releases" title="CyclOSM - Open Bicycle render">CyclOSM</a> | Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      }
+    ).addTo(this.mapCity);
+
+    //this.showCityMap(this.mapCity );
   }
 
   getParkingLots() {
@@ -68,41 +116,12 @@ export class SearchPlacesComponent {
             this.show('error', 'Error', 'No se encontraron parqueaderos');
           }
           this.parqueaderos = resp;
-          this.showCityMap();
+          //this.showCityMap();
         },
         (err) => {
           this.show('error', 'Error', err.message);
         }
       );
-  }
-
-  /**
-    * Inicia las ventanas de confirmacion, tiene las siguientes modalidades
-    * success
-    * info
-    * warn
-    * error
-  */
-  show(severity: string, summary: string, detail: string) {
-    this.messageService.add({
-      severity: severity,
-      summary: summary,
-      detail: detail,
-    });
-  }
-
-  ngAfterViewInit(): void {
-    this.mapCity = new L.Map('map').setView([3.44898, -76.52781], 13);
-    L.tileLayer(
-      'https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
-      {
-        maxZoom: 20,
-        attribution:
-          '<a href="https://github.com/cyclosm/cyclosm-cartocss-style/releases" title="CyclOSM - Open Bicycle render">CyclOSM</a> | Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      }
-    ).addTo(this.mapCity);
-
-    //this.showCityMap(this.mapCity );
   }
 
   showCityMap() {
@@ -129,17 +148,22 @@ export class SearchPlacesComponent {
     });
   }
 
+  
   reservar(id: number) {
     this.parkingService
       .getAllParkingSpaces(id)
       .pipe(takeUntil(this.unsubscribe$))
       .subscribe(
         (resp: ParkingSpace) => {
+          this.reservaForm.get('placa').setValue(this.selectedVehicleType);
+          this.reservaForm.get('placa').disable();
+          
           if (!resp) {
             this.show('error', 'Error', 'No se encontraron plazas disponibles');
+          } else{
+            this.listaPlazas = resp;
+            this.mostarPlazasDisponibles(id);  
           }
-          this.listaPlazas = resp;
-          this.mostarPlazasDisponibles(id);
         },
         (err) => {
           this.show('error', 'Error', err.message);
@@ -147,7 +171,39 @@ export class SearchPlacesComponent {
       );
   }
 
+  mostrarPlazasDisponiblesPlaca(vehicle: Vehicle): void {  
+    this.selectedVehicleType = vehicle;
+    /**
+     * Se debe cambiar por la api donde consulta los parqueaderos con ese tipo de plazas disponibles  
+     * Se envia el tipo de vehiculo y se espera la lista
+     * @param tipoVehiculo = this.selectedVehicleType.type
+     * */
+    this.parkingService
+    .getAllParkingLots()
+    .pipe(takeUntil(this.unsubscribe$))
+    .subscribe(
+      (resp: ParkingLot) => {
+        if (!resp) {
+          this.show('error', 'Error', 'No se encontraron parqueaderos');
+        } else{
+        this.parqueaderos = resp;
+        this.showCityMap();
+        this.show('success', 'Bienvenido', 'Se mostraran los parqueaderos con plazas disponibles para ' + this.selectedVehicleType.type);
+        this.closePlatesModal();
+        }      
+      },
+      (err) => {
+        this.show('error', 'Error', err.message);
+      }
+    );
+  }
+
   mostarPlazasDisponibles(id: number) {
+    this.plazaSeleccionada = this.parqueaderos.find((x: any) => x.id === id);
+    this.mostrarModalRegistro();
+    
+    return;
+    this.displayModalPlazas = true;
     let parkingSelect = this.parqueaderos.find((x: any) => x.id === id);
     let placesAvailable = this.listaPlazas.length;
     this.confirmationService.confirm({
@@ -163,15 +219,32 @@ export class SearchPlacesComponent {
   }
 
   mostrarModalRegistro() {
-    this.displayModal = true;
+    this.displayModalRegistro = true;
   }
 
   realizarRegistro() {
     // Lógica para guardar la reserva
-    this.displayModal = false; // Cerrar el diálogo
+    this.displayModalRegistro = false; // Cerrar el diálogo
   }
 
   cancelarReserva() {
-    this.displayModal = false;
+    this.displayModalRegistro = false;
   }
+
+  get placa() {
+    return this.reservaForm.get('placa');
+  }
+  
+  get fechaReserva() {
+    return this.reservaForm.get('fechaReserva');
+  }
+  
+  get horaEntrada() {
+    return this.reservaForm.get('horaEntrada');
+  }
+  
+  get horaSalida() {
+    return this.reservaForm.get('horaSalida');
+  }
+  
 }
