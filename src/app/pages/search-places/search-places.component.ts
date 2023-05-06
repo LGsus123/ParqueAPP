@@ -77,10 +77,11 @@ export class SearchPlacesComponent {
   }
 
   /**
-    success
-    info
-    warn
-    error
+    * Inicia las ventanas de confirmacion, tiene las siguientes modalidades
+    * success
+    * info
+    * warn
+    * error
   */
   show(severity: string, summary: string, detail: string) {
     this.messageService.add({
