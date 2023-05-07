@@ -34,7 +34,9 @@ import { ConfirmationService } from 'primeng/api';
 import { DropdownModule } from 'primeng/dropdown';
 import { CalendarModule } from 'primeng/calendar';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-
+import { PrimerCaracterPipe } from './core/pipes/primer-caracter.pipe';
+import { DateFormatPipe } from './core/pipes/date-format.pipe';
+import { HourFormatPipe } from './core/pipes/hour-format.pipe';
 export function HttpLoaderFactory(http: HttpClient) {
   return new TranslateHttpLoader(http);
 }
@@ -50,7 +52,10 @@ export function HttpLoaderFactory(http: HttpClient) {
     DashboardComponent,
     HeaderComponent,
     FooterComponent,
-    SidebarComponent
+    SidebarComponent,
+    PrimerCaracterPipe,
+    DateFormatPipe,
+    HourFormatPipe
   ],
   imports: [
     BrowserModule,

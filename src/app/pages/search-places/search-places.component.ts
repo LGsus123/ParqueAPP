@@ -7,11 +7,15 @@ import { ParkingLot, ParkingSpace } from 'src/app/core/models/parqueapp';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DomHandler } from 'primeng/dom';
 import { Vehicle } from '../../core/models/parqueapp';
+import { Router } from '@angular/router';
+import { DateFormatPipe } from '../../core/pipes/date-format.pipe';
+import { HourFormatPipe } from '../../core/pipes/hour-format.pipe';
 
 @Component({
   selector: 'app-search-places',
   templateUrl: './search-places.component.html',
   styleUrls: ['./search-places.component.scss'],
+  providers: [DateFormatPipe, HourFormatPipe]
 })
 export class SearchPlacesComponent {
   private unsubscribe$ = new Subject<void>();
@@ -25,36 +29,32 @@ export class SearchPlacesComponent {
   public plazaSeleccionada: any = {};
   public listaVehiculos: any = [];
   public selectedVehicleType: any;
+  public objetoReserva: any;
+
+  // Topes de fechas
+  minDate: Date;
+  maxDate: Date;
+  minHour: any;
 
   constructor(
     private parkingService: ParkingService,
     private messageService: MessageService,
     private elementRef: ElementRef,
     private confirmationService: ConfirmationService,
-    private formBuilder: FormBuilder
-  ) {}
+    private formBuilder: FormBuilder,
+    private router: Router,
+    private datePipe: DateFormatPipe,
+    private hourPipe: HourFormatPipe
+  ) {
+      this.minDate = new Date();
+      this.maxDate = new Date();
+  }
 
   ngOnInit(): void {
     //this.getParkingLots();
+    this.topesFechas();
     this.crearFormulario();
-    this.listaVehiculos = [
-      {
-        id: 1,
-        plate: 'ICQ40D',
-        type: 'Moto',
-      },
-      {
-        id: 2,
-        plate: 'JBG23F',
-        type: 'Carro',
-      },
-      {
-        id: 3,
-        plate: 'NPM16R',
-        type: 'Carro',
-      },
-    ];
-
+    this.getAllVehiclesByCustomerId();    
     this.openPlatesModal();
   }
 
@@ -104,6 +104,32 @@ export class SearchPlacesComponent {
     ).addTo(this.mapCity);
 
     //this.showCityMap(this.mapCity );
+  }
+
+  topesFechas(){   
+    let today = new Date();
+    let tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    this.minDate = today;
+    this.maxDate = tomorrow;    
+  }
+
+  getAllVehiclesByCustomerId(){
+    this.parkingService
+    .getAllVehiclesByCustomerId(1)
+    .pipe(takeUntil(this.unsubscribe$))
+    .subscribe(
+      (resp: ParkingLot) => {
+        if (!resp) {
+          this.show('error', 'Error', 'No se encontraron parqueaderos');
+        }
+        this.listaVehiculos = resp;
+        //this.showCityMap();
+      },
+      (err) => {
+        this.show('error', 'Error', err.message);
+      }
+    );
   }
 
   getParkingLots() {
@@ -157,6 +183,8 @@ export class SearchPlacesComponent {
         (resp: ParkingSpace) => {
           this.reservaForm.get('placa').setValue(this.selectedVehicleType);
           this.reservaForm.get('placa').disable();
+          this.reservaForm.get('horaEntrada').disable();
+          this.reservaForm.get('horaSalida').disable();
           
           if (!resp) {
             this.show('error', 'Error', 'No se encontraron plazas disponibles');
@@ -164,6 +192,7 @@ export class SearchPlacesComponent {
             this.listaPlazas = resp;
             this.mostarPlazasDisponibles(id);  
           }
+       
         },
         (err) => {
           this.show('error', 'Error', err.message);
@@ -173,13 +202,8 @@ export class SearchPlacesComponent {
 
   mostrarPlazasDisponiblesPlaca(vehicle: Vehicle): void {  
     this.selectedVehicleType = vehicle;
-    /**
-     * Se debe cambiar por la api donde consulta los parqueaderos con ese tipo de plazas disponibles  
-     * Se envia el tipo de vehiculo y se espera la lista
-     * @param tipoVehiculo = this.selectedVehicleType.type
-     * */
     this.parkingService
-    .getAllParkingLots()
+    .getParkingLotsByParkingSpaceType(this.selectedVehicleType.type)
     .pipe(takeUntil(this.unsubscribe$))
     .subscribe(
       (resp: ParkingLot) => {
@@ -218,12 +242,55 @@ export class SearchPlacesComponent {
     });
   }
 
+  validateDate(){    
+      this.reservaForm.get('horaEntrada').enable();
+      
+  }
+
+  validateTime(){
+    this.reservaForm.get('horaSalida').enable(); 
+  }
+
+  redirectToDashboard() {
+    if(!this.reservaForm.get('placa').value){
+      this.router.navigate(['/dashboard']);
+    } 
+   
+  }
+
   mostrarModalRegistro() {
     this.displayModalRegistro = true;
   }
 
+  crearObjetoReserva(){
+    //http://localhost:8080/parking-space/reserveParkingSpace/1/1/moto/2023-05-07/10:30/13:30
+    //parking_lot_id: any, id_vehicle: any, type_vehicle: any, date_reserve: any, start_time: any, end_time: any,
+    this.objetoReserva = {
+      parking_lot_id: this.plazaSeleccionada.id,
+      id_vehicle: this.selectedVehicleType.id,
+      type_vehicle: this.selectedVehicleType.type,
+      date_reserve: this.datePipe.transform(this.reservaForm.get('fechaReserva').value),
+      start_time: this.hourPipe.transform(this.reservaForm.get('horaEntrada').value),
+      end_time: this.hourPipe.transform(this.reservaForm.get('horaSalida').value),
+    };    
+    this.realizarRegistro();
+  }
+
   realizarRegistro() {
-    // Lógica para guardar la reserva
+    
+    this.parkingService
+    .reserveParkingSpace(this.objetoReserva.parking_lot_id, this.objetoReserva.id_vehicle,
+                          this.objetoReserva.type_vehicle, this.objetoReserva.date_reserve,
+                          this.objetoReserva.start_time, this.objetoReserva.end_time)
+    .pipe(takeUntil(this.unsubscribe$))
+    .subscribe(
+      (resp: any) => {
+        this.show('success', 'Reservado', 'Reserva realizada con exito');       
+      },
+      (err) => {
+        this.show('error', 'Error Reserva', err.message);
+      }
+    );
     this.displayModalRegistro = false; // Cerrar el diálogo
   }
 

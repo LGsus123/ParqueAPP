@@ -6,19 +6,17 @@
   <p-confirmDialog
     header="Confirmar"
     key="plazas-disponibles"
-    icon="pi pi-exclamation-triangle"
-  >
+    icon="pi pi-exclamation-triangle">
   </p-confirmDialog>
 
-  <p-dialog
+  <p-dialog 
     header="Seleccione su vehiculo"
     [(visible)]="displayModalPlazas"
     [style]="{ width: '20vw' }"
     [modal]="true"
+    (onHide)="redirectToDashboard()"
   >
-    <!--  <p>El parqueadero <b>{{plazaSeleccionada.name}}</b> tiene {{listaPlazas.length}} plazas disponibles, desea reservar?</p> -->
     <div class="p-col-4 p-md-text-left p-sm-12 p-text-right">
-      <label for="Placa">Placa</label>
       <div class="position-relative">
         <p-dropdown
           [options]="listaVehiculos"
@@ -77,6 +75,9 @@
           [showIcon]="false"
           label="Fecha reserva:"
           [required]="true"
+          appendTo="body"
+          [minDate]="minDate" [maxDate]="maxDate" 
+          (onSelect)="validateDate()"
         ></p-calendar>
       </div>
     </div>
@@ -89,7 +90,9 @@
           formControlName="horaEntrada"
           [showIcon]="false"
           [required]="true"
-        ></p-calendar>
+          [minDate]="minHour"
+          (onSelect)="validateTime()" 
+          ></p-calendar>
       </div>
     </div>
 
@@ -108,8 +111,9 @@
     <div class="card flex flex-wrap gap-3 justify-content-center">
       <p-button
         label="Aceptar"
-        styleClass="p-button-raised"
-        (click)="realizarRegistro()"
+        styleClass="p-button-warning"
+        (click)="crearObjetoReserva()"
+        [disabled]="reservaForm.invalid"
       ></p-button>
       <p-button
         label="Cancelar"

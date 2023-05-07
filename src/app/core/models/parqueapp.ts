@@ -31,4 +31,7 @@ export interface Vehicle {
     id: number,
     plate: string;
     type: string;
+    customer: Customer,
+    parking_space: ParkingSpace
 }
+
