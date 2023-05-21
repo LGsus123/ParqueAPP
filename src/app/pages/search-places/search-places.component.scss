@@ -18,4 +18,37 @@
     color: black !important;
     border-color: #ffb900 !important;
   }
-  
+
+  .layout-config-button {
+    display: block;
+    position: fixed;
+    width: 2rem;
+    height: 3rem;
+    line-height: 3rem;
+    background: #f6bc3b;
+    color: #ffffff;
+    text-align: center;
+    top: 6rem;
+    right: 0;
+    margin-top: -1.5rem;
+    border-top-left-radius: var(--border-radius);
+    border-bottom-left-radius: var(--border-radius);
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    transition: background-color var(--transition-duration);
+    overflow: hidden;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: -.25rem 0 1rem rgba(0,0,0,.15);
+
+    i {
+       // font-size: 2rem;
+        line-height: inherit;
+        transform: rotate(0deg);
+        transition: transform 1s;
+    }
+    
+    &:hover {
+        background: #e5a210;
+    }
+}

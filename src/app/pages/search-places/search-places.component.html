@@ -1,5 +1,4 @@
 <div id="map"></div>
-
 <p-toast></p-toast>
 
 <form [formGroup]="reservaForm" class="p-fluid">
@@ -127,19 +126,18 @@
 </form>
 
 <form [formGroup]="reservaFiltrosForm" class="p-fluid">
-  <p-button
-    (click)="openFilterModal()"
-    icon="pi pi-external-link"
-    label="Show"
-  ></p-button>
+ 
+  <button class="layout-config-button p-link" styleClass="p-button-warning" type="button" (click)="openFilterModal()">
+    <i class="pi pi-filter"></i>
+  </button>
+
+ 
 
   <p-dialog
     header="Filtrar Parqueaderos"
     [(visible)]="displayModalFiltros"
     [style]="{ width: '30vw' }"
   >
-    <hr class="separator" />
-
     <div style="display: flex; flex-direction: column">
       <label>Horario de atención</label>
       <div style="display: flex; flex-wrap: wrap">

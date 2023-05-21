@@ -14,7 +14,7 @@ export class HeaderComponent {
   private unsubscribe$ = new Subject<void>();
 
   opciones: MegaMenuItem[] = [];
-  cliente: any;
+  cliente:  any = {};
   constructor(@Inject(DOCUMENT) private document: Document,
               private parkingService: ParkingService,
               private messageService: MessageService) { }
@@ -56,7 +56,7 @@ export class HeaderComponent {
     .subscribe(
       (resp: Customer) => {
         if (!resp) {
-          this.show('error', 'Error', 'No se encontraron parqueaderos');
+          this.show('error', 'Error', 'No se encontro Usuario');
         }
         this.cliente = resp;
         //this.showCityMap();

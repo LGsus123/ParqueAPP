@@ -113,7 +113,15 @@ export class SearchPlacesComponent {
   }
 
   ngAfterViewInit(): void {
-    this.mapCity = new L.Map('map').setView([3.44898, -76.52781], 15);
+    this.mapCity = new L.Map('map', {
+      zoomControl: false, // Desactiva el control de zoom predeterminado
+    }).setView([3.44898, -76.52781], 15);
+  
+    // Agrega el control de zoom personalizado en la esquina inferior derecha
+    L.control.zoom({
+      position: 'bottomright'
+    }).addTo(this.mapCity);
+  
     L.tileLayer(
       'https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
       {
@@ -122,9 +130,9 @@ export class SearchPlacesComponent {
           '<a href="https://github.com/cyclosm/cyclosm-cartocss-style/releases" title="CyclOSM - Open Bicycle render">CyclOSM</a> | Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }
     ).addTo(this.mapCity);
-
-    //this.showCityMap(this.mapCity );
   }
+  
+  
 
   topesFechas(){   
     let today = new Date();
