@@ -26,12 +26,19 @@ export class SearchPlacesComponent {
   public displayModalRegistro = false;
   public displayModalPlazas = false;
   public reservaForm: any = FormGroup;
+  public reservaFiltrosForm: any = FormGroup;
   public plazaSeleccionada: any = {};
   public listaVehiculos: any = [];
   public selectedVehicleType: any;
   public objetoReserva: any;
 
   public displayModalFiltros = false;
+  public camposFiltros = {
+    horaFilterEntrada: '',
+    horaFilterCierre: '',
+    montoMinimo: '',
+    montoMaximo: ''
+  };
 
   // Topes de fechas
   minDate: Date;
@@ -56,7 +63,8 @@ export class SearchPlacesComponent {
   ngOnInit(): void {
     //this.getParkingLots();
     this.topesFechas();
-    this.crearFormulario();
+    this.crearFormulario();    
+    this.crearFormularioFiltros();
     this.getAllVehiclesByCustomerId();    
     this.openPlatesModal();
   }
@@ -75,6 +83,15 @@ export class SearchPlacesComponent {
       fechaReserva: ['', Validators.required],
       horaEntrada: ['', Validators.required],
       horaSalida: ['', Validators.required],
+    });
+  }
+
+  crearFormularioFiltros() {
+    this.reservaFiltrosForm = this.formBuilder.group({
+      horaFilterEntrada: [''],
+      horaFilterCierre: [''],
+      montoMinimo: [''],
+      montoMaximo: [''],
     });
   }
 
@@ -302,23 +319,25 @@ export class SearchPlacesComponent {
   }
 
   assignEntryDate($event: any){
-    console.log($event);    
+    this.camposFiltros.horaFilterEntrada = this.hourPipe.transform($event);
   }
 
   assignExitDate($event: any){
-    console.log($event);  
+    this.camposFiltros.horaFilterCierre = this.hourPipe.transform($event);
   }
 
   assignMinimumAmount($event: any){
-    console.log($event);  
+    this.camposFiltros.montoMinimo = $event.value;
   }
 
-  assignMaximumAmount($event: any){
-    console.log($event);  
+  assignMaximumAmount($event: any){   
+    this.camposFiltros.montoMaximo = $event.value;
   }
 
   sendFilter(){
-    console.log('send');  
+    this.camposFiltros.montoMinimo = this.reservaFiltrosForm.get('montoMinimo').value;
+    this.camposFiltros.montoMaximo = this.reservaFiltrosForm.get('montoMaximo').value;
+    console.log('send', this.reservaFiltrosForm);  
   }
 
   openFilterModal(){
@@ -343,6 +362,19 @@ export class SearchPlacesComponent {
   
   get horaSalida() {
     return this.reservaForm.get('horaSalida');
+  }
+
+  get horaFilterEntrada(){
+    return this.reservaFiltrosForm.get('horaFilterEntrada');
+  }
+  get horaFilterCierre(){
+    return this.reservaFiltrosForm.get('horaFilterCierre');
+  }
+  get montoMinimo(){
+    return this.reservaFiltrosForm.get('montoMinimo');
+  }
+  get montoMaximo(){
+    return this.reservaFiltrosForm.get('montoMaximo');
   }
   
 }
