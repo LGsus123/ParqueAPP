@@ -123,3 +123,95 @@
     </div>
   </p-dialog>
 </form>
+
+<p-button
+  (click)="openFilterModal()"
+  icon="pi pi-external-link"
+  label="Show"
+></p-button>
+
+<p-dialog
+  header="Filtrar Parqueaderos"
+  [(visible)]="displayModalFiltros"
+  [style]="{ width: '30vw' }"
+>
+  <hr class="separator" />
+  <!-- Horario de atención -->
+  <div class="p-col-6 p-md-text-left p-sm-12 p-text-right">
+    <label>Horario de atención</label>
+    <div class="p-col-6 p-pt-2">
+      <p-calendar
+        [timeOnly]="true"
+        formControlName="horaFilterEntrada"
+        [showIcon]="false"
+        [required]="true"
+        (onSelect)="assignEntryDate($event)"
+        placeholder="Entrada"
+      ></p-calendar>
+    </div>
+    <div class="p-col-6 p-pt-2">        
+      <p-calendar
+        [timeOnly]="true"
+        formControlName="horaFilterCierre"
+        [showIcon]="false"
+        (onSelect)="assignExitDate($event)"
+        [minDate]="minHourSalida"
+        placeholder="Salida"
+      ></p-calendar>
+    </div>
+  </div>
+  <hr class="separator" />
+  <div class="p-col-6 p-md-text-left p-sm-12 p-text-right">
+    <label>Tarifas</label>
+    <div class="p-col-6 p-pt-2">
+      <p-dropdown
+        [options]="listaVehiculos"
+        formControlName="montoMinimo"
+        class=""
+        optionLabel="plate"
+        [filter]="true"
+        filterBy="plate"
+        [showClear]="true"
+        placeholder="Minimo"
+        appendTo="body"
+        (onChange)="assignMinimumAmount($event)"
+      >
+        <ng-template let-vehiculo pTemplate="item">
+          <div class="d-flex align-items-center gap-2">
+            <div>{{ vehiculo.plate }}</div>
+          </div>
+        </ng-template>
+      </p-dropdown>
+
+      <p-dropdown
+        [options]="listaVehiculos"
+        formControlName="montoMaximo"
+        class=""
+        optionLabel="plate"
+        [filter]="true"
+        filterBy="plate"
+        [showClear]="true"
+        placeholder="Máximo"
+        appendTo="body"
+        (onChange)="assignMaximumAmount($event)"
+      >
+        <ng-template let-vehiculo pTemplate="item">
+          <div class="d-flex align-items-center gap-2">
+            <div>{{ vehiculo.plate }}</div>
+          </div>
+        </ng-template>
+      </p-dropdown>
+    </div>
+  </div>
+  <hr class="separator" />
+  <p-button
+    label="Aceptar"
+    styleClass="p-button-warning"
+    (click)="sendFilter()"
+  ></p-button>
+  <p-button
+    label="Cancelar"
+    styleClass="p-button-outlined p-button-secondary"
+    (click)="closeFilterModal()"
+  ></p-button>
+</p-dialog>

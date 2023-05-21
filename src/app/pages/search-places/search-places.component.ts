@@ -31,10 +31,13 @@ export class SearchPlacesComponent {
   public selectedVehicleType: any;
   public objetoReserva: any;
 
+  public displayModalFiltros = false;
+
   // Topes de fechas
   minDate: Date;
   maxDate: Date;
   minHour: any;
+  minHourSalida: any;
 
   constructor(
     private parkingService: ParkingService,
@@ -296,6 +299,34 @@ export class SearchPlacesComponent {
 
   cancelarReserva() {
     this.displayModalRegistro = false;
+  }
+
+  assignEntryDate($event: any){
+    console.log($event);    
+  }
+
+  assignExitDate($event: any){
+    console.log($event);  
+  }
+
+  assignMinimumAmount($event: any){
+    console.log($event);  
+  }
+
+  assignMaximumAmount($event: any){
+    console.log($event);  
+  }
+
+  sendFilter(){
+    console.log('send');  
+  }
+
+  openFilterModal(){
+    this.displayModalFiltros = true;
+  }
+
+  closeFilterModal(){
+    this.displayModalFiltros = false;
   }
 
   get placa() {
