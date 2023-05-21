@@ -326,14 +326,6 @@ export class SearchPlacesComponent {
     this.camposFiltros.horaFilterCierre = this.hourPipe.transform($event);
   }
 
-  assignMinimumAmount($event: any){
-    this.camposFiltros.montoMinimo = $event.value;
-  }
-
-  assignMaximumAmount($event: any){   
-    this.camposFiltros.montoMaximo = $event.value;
-  }
-
   sendFilter(){
     this.camposFiltros.montoMinimo = this.reservaFiltrosForm.get('montoMinimo').value;
     this.camposFiltros.montoMaximo = this.reservaFiltrosForm.get('montoMaximo').value;
@@ -346,6 +338,16 @@ export class SearchPlacesComponent {
 
   closeFilterModal(){
     this.displayModalFiltros = false;
+  }
+
+  handleKeyPress(event: KeyboardEvent) {
+    const keyCode = event.keyCode || event.which;
+    const keyValue = String.fromCharCode(keyCode);
+    const regex = /^[0-9]+$/;
+
+    if (!regex.test(keyValue)) {
+      event.preventDefault();
+    }
   }
 
   get placa() {

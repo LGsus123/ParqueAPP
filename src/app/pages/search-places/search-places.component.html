@@ -6,10 +6,11 @@
   <p-confirmDialog
     header="Confirmar"
     key="plazas-disponibles"
-    icon="pi pi-exclamation-triangle">
+    icon="pi pi-exclamation-triangle"
+  >
   </p-confirmDialog>
 
-  <p-dialog 
+  <p-dialog
     header="Seleccione su vehiculo"
     [(visible)]="displayModalPlazas"
     [style]="{ width: '20vw' }"
@@ -76,7 +77,8 @@
           label="Fecha reserva:"
           [required]="true"
           appendTo="body"
-          [minDate]="minDate" [maxDate]="maxDate" 
+          [minDate]="minDate"
+          [maxDate]="maxDate"
           (onSelect)="validateDate()"
         ></p-calendar>
       </div>
@@ -91,8 +93,8 @@
           [showIcon]="false"
           [required]="true"
           [minDate]="minHour"
-          (onSelect)="validateTime()" 
-          ></p-calendar>
+          (onSelect)="validateTime()"
+        ></p-calendar>
       </div>
     </div>
 
@@ -130,69 +132,102 @@
     icon="pi pi-external-link"
     label="Show"
   ></p-button>
-  
+
   <p-dialog
     header="Filtrar Parqueaderos"
     [(visible)]="displayModalFiltros"
     [style]="{ width: '30vw' }"
   >
     <hr class="separator" />
-    <!-- Horario de atención -->
-    <div class="p-col-6 p-md-text-left p-sm-12 p-text-right">
+
+    <div style="display: flex; flex-direction: column">
       <label>Horario de atención</label>
-      <div class="p-col-6 p-pt-2">
-        <p-calendar
-          [timeOnly]="true"
-          formControlName="horaFilterEntrada"
-          [showIcon]="false"
-          [required]="true"
-          (onSelect)="assignEntryDate($event)"
-          placeholder="Entrada"
-        ></p-calendar>
-      </div>
-      <div class="p-col-6 p-pt-2">        
-        <p-calendar
-          [timeOnly]="true"
-          formControlName="horaFilterCierre"
-          [showIcon]="false"
-          (onSelect)="assignExitDate($event)"
-          [minDate]="minHourSalida"
-          placeholder="Salida"
-        ></p-calendar>
+      <div style="display: flex; flex-wrap: wrap">
+        <div style="flex-basis: 50%; padding-right: 5px">
+          <div>
+            <p-calendar
+              [timeOnly]="true"
+              formControlName="horaFilterEntrada"
+              [showIcon]="false"
+              [required]="true"
+              (onSelect)="assignEntryDate($event)"
+              placeholder="Entrada"
+            ></p-calendar>
+          </div>
+        </div>
+        <div style="flex-basis: 50%; padding-left: 5px">
+          <div>
+            <p-calendar
+              [timeOnly]="true"
+              formControlName="horaFilterCierre"
+              [showIcon]="false"
+              (onSelect)="assignExitDate($event)"
+              [minDate]="minHourSalida"
+              placeholder="Salida"
+            ></p-calendar>
+          </div>
+        </div>
       </div>
     </div>
+
     <hr class="separator" />
-    <div class="p-col-6 p-md-text-left p-sm-12 p-text-right">
+
+    <div style="display: flex; flex-direction: column">
       <label>Tarifas</label>
-      <div class="p-col-6 p-pt-2">
-        <span class="p-input-icon-left">
-          <i class="pi pi-dollar"></i>
-          <input type="text" pInputText
+      <div style="display: flex; flex-wrap: wrap">
+        <div style="flex-basis: 50%; padding-right: 10px">
+          <div>
+            <span class="p-input-icon-left">
+              <i class="pi pi-dollar"></i>
+              <input
+                type="text"
+                pInputText
                 formControlName="montoMinimo"
-                placeholder="Monto Minimo"/>
-      </span>
-      </div>
-      <div class="p-col-6 p-pt-2">
-        <span class="p-input-icon-left">
-          <i class="pi pi-dollar"></i>
-          <input type="text" pInputText
+                (keypress)="handleKeyPress($event)"
+                placeholder="Monto Mínimo"
+              />
+            </span>
+          </div>
+        </div>
+        <div style="flex-basis: 50%; padding-left: 10px">
+          <div>
+            <span class="p-input-icon-left">
+              <i class="pi pi-dollar"></i>
+              <input
+                type="text"
+                pInputText
                 formControlName="montoMaximo"
-                placeholder="Monto Máximo"/>
-      </span>
+                (keypress)="handleKeyPress($event)"
+                placeholder="Monto Máximo"
+              />
+            </span>
+          </div>
+        </div>
       </div>
-     
-  
     </div>
+
     <hr class="separator" />
-    <p-button
-      label="Aceptar"
-      styleClass="p-button-warning"
-      (click)="sendFilter()"
-    ></p-button>
-    <p-button
-      label="Cancelar"
-      styleClass="p-button-outlined p-button-secondary"
-      (click)="closeFilterModal()"
-    ></p-button>
+    <div style="display: flex; flex-direction: column">
+      <div style="display: flex; flex-wrap: wrap">
+        <div style="flex-basis: 50%; padding-right: 10px">
+          <div>
+            <p-button
+              label="Aceptar"
+              styleClass="p-button-warning"
+              (click)="sendFilter()"
+            ></p-button>
+          </div>
+        </div>
+        <div style="flex-basis: 50%; padding-left: 10px">
+          <div>
+            <p-button
+              label="Cancelar"
+              styleClass="p-button-outlined p-button-secondary"
+              (click)="closeFilterModal()"
+            ></p-button>
+          </div>
+        </div>
+      </div>
+    </div>
   </p-dialog>
 </form>
