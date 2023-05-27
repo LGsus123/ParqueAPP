@@ -9,6 +9,7 @@ export interface ParkingLot {
     address: String,
     latitude: number,
     longitude: number,
+    value?: number
 }
 
 export interface Customer {
@@ -35,3 +36,10 @@ export interface Vehicle {
     parking_space: ParkingSpace
 }
 
+export interface WithFilters {
+    start_time: string,
+    end_time: string,
+    min_amount: number,
+    max_amount: number,
+    type: string
+}

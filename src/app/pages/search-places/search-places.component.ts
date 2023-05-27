@@ -3,7 +3,7 @@ import * as L from 'leaflet';
 import { Subject, takeUntil } from 'rxjs';
 import { ParkingService } from 'src/app/core/services/parking.service';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { ParkingLot, ParkingSpace } from 'src/app/core/models/parqueapp';
+import { ParkingLot, ParkingSpace, WithFilters } from 'src/app/core/models/parqueapp';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DomHandler } from 'primeng/dom';
 import { Vehicle } from '../../core/models/parqueapp';
@@ -33,11 +33,12 @@ export class SearchPlacesComponent {
   public objetoReserva: any;
 
   public displayModalFiltros = false;
-  public camposFiltros = {
-    horaFilterEntrada: '',
-    horaFilterCierre: '',
-    montoMinimo: '',
-    montoMaximo: ''
+  public camposFiltros: any = {
+    start_time: null,
+    end_time: null,
+    min_amount: null,
+    max_amount: null,
+    type: ''
   };
 
   // Topes de fechas
@@ -178,7 +179,7 @@ export class SearchPlacesComponent {
       );
   }
 
-  showCityMap() {
+  showCityMap() {    
     this.parqueaderos.forEach((item: any) => {
       const popupOptions = {
         className: 'customPopup test2',
@@ -187,6 +188,7 @@ export class SearchPlacesComponent {
       <p class="popup__header"> <strong> ${item.name} </strong> <br> 
       <div class="separator-1">Dirección: ${item.address}</div>
       <div class="separator-1">Horario de atención: ${item.start_date} - ${item.end_date}</div>
+      <div class="separator-1">Tarifa: $${item.value}</div>
       <button type="button" id="sendData" class="edit btn btn-warning btn-sm btn-block dataModal sendData" data-toggle="modal" data-target="#dataModal">Reservar</button> </p>`;
       const marker: L.Marker = L.marker([item.latitude, item.longitude])
         .addTo(this.mapCity)
@@ -238,10 +240,33 @@ export class SearchPlacesComponent {
         if (!resp) {
           this.show('error', 'Error', 'No se encontraron parqueaderos');
         } else{
-        this.parqueaderos = resp;
-        this.showCityMap();
+        this.parqueaderos = resp;    
+        this.parqueaderos.forEach((element: any, index: any) => {
+          this.consultarTarifas(element.id, index);
+        });
+        setTimeout(() => {
+          this.showCityMap();
+        }, 300);
         this.show('success', 'Bienvenido', 'Se mostraran los parqueaderos con plazas disponibles para ' + this.selectedVehicleType.type);
         this.closePlatesModal();
+        }      
+      },
+      (err) => {
+        this.show('error', 'Error', err.message);
+      }
+    );
+  }
+
+  consultarTarifas(id: number, i: number){    
+    this.parkingService
+    .getFeeValueByParkingSpaceTypeAndParkingLotId(this.selectedVehicleType.type, id)
+    .pipe(takeUntil(this.unsubscribe$))
+    .subscribe(
+      (resp: ParkingLot) => {
+        if (!resp) {
+          this.show('error', 'Error', 'No se encontraron tarifas');
+        } else{
+          this.parqueaderos[i].value = resp;          
         }      
       },
       (err) => {
@@ -327,18 +352,53 @@ export class SearchPlacesComponent {
   }
 
   assignEntryDate($event: any){
-    this.camposFiltros.horaFilterEntrada = this.hourPipe.transform($event);
+    this.camposFiltros.start_time = this.hourPipe.transform($event);    
   }
 
   assignExitDate($event: any){
-    this.camposFiltros.horaFilterCierre = this.hourPipe.transform($event);
+    this.camposFiltros.end_time = this.hourPipe.transform($event);
   }
 
   sendFilter(){
-    this.camposFiltros.montoMinimo = this.reservaFiltrosForm.get('montoMinimo').value;
-    this.camposFiltros.montoMaximo = this.reservaFiltrosForm.get('montoMaximo').value;
-    console.log('send', this.reservaFiltrosForm);  
+    this.camposFiltros.min_amount = parseInt(this.reservaFiltrosForm.get('montoMinimo').value) || null;
+    this.camposFiltros.max_amount = parseInt(this.reservaFiltrosForm.get('montoMaximo').value) || null;
+    this.camposFiltros.type = this.reservaForm.get('placa').value.type;
+    
+    this.parkingService
+      .getParkingLotsWithFilters(this.camposFiltros)
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (resp: ParkingLot) => {
+          this.parqueaderos = resp;    
+        this.parqueaderos.forEach((element: any, index: any) => {
+          this.consultarTarifas(element.id, index);
+        });
+        this.clearMap();
+        setTimeout(() => {
+          this.showCityMap();
+        }, 300);
+          let cantidadPosiciones = 0;
+          this.parqueaderos.forEach(() => {
+              cantidadPosiciones++;
+          });
+         this.show('success', 'Confirmación', 'Se encontraron ' + cantidadPosiciones + ' registros.');          
+         this.closeFilterModal();
+         this.reservaFiltrosForm.reset();      
+        },
+        (err) => {
+          this.show('error', 'Error', err.message);
+        }
+      );
   }
+
+  clearMap() {
+    this.mapCity.eachLayer((layer: any) => {
+      if (layer instanceof L.Marker) {
+        this.mapCity.removeLayer(layer);
+      }
+    });
+  }
+  
 
   openFilterModal(){
     this.displayModalFiltros = true;
