@@ -11,7 +11,13 @@ export class HourFormatPipe implements PipeTransform {
       let hora = `${fecha.getHours()}:${fecha.getMinutes()}`;
       
       if (fecha.getHours() < 10) {
-        hora = `0${fecha.getHours()}:${fecha.getMinutes()}`;
+        hora = `0${fecha.getHours()}`;
+      }
+      
+      if (fecha.getMinutes() < 10) {
+        hora += `:0${fecha.getMinutes()}`;
+      } else {
+        hora += `:${fecha.getMinutes()}`;
       }
       
       return hora;

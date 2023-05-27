@@ -329,8 +329,7 @@ export class SearchPlacesComponent {
     this.realizarRegistro();
   }
 
-  realizarRegistro() {
-    
+  realizarRegistro() {    
     this.parkingService
     .reserveParkingSpace(this.objetoReserva.parking_lot_id, this.objetoReserva.id_vehicle,
                           this.objetoReserva.type_vehicle, this.objetoReserva.date_reserve,
@@ -338,7 +337,8 @@ export class SearchPlacesComponent {
     .pipe(takeUntil(this.unsubscribe$))
     .subscribe(
       (resp: any) => {
-        this.show('success', 'Reservado', 'Reserva realizada con exito');       
+        this.show('success', 'Reservado', 'Reserva realizada con exito'); 
+        this.reservaForm.reset();      
       },
       (err) => {
         this.show('error', 'Error Reserva', err.message);
